@@ -4,34 +4,60 @@ import com.example.springboard.dto.BoardRequestDto;
 import com.example.springboard.dto.BoardResponseDto;
 import com.example.springboard.entity.Board;
 import lombok.val;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
-import java.util.HashMap;
+
 import java.util.List;
-import java.util.Map;
+
 
 @RestController
 @RequestMapping("/board")
 public class BoardController {
-    private final Map<Long, Board> boardList = new HashMap<>();
+    private final JdbcTemplate jdbcTemplate;
+
+    public BoardController(JdbcTemplate jdbcTemplate){
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
     @PostMapping("/create")
     public BoardResponseDto createBoard(@RequestBody BoardRequestDto requestDto){
         // requestdto -> entity 로
         Board board = new Board(requestDto);
 
-        // board max id
-        Long maxId = boardList.size() > 0 ? Collections.max(boardList.keySet())+1 : 1;
-        board.setId(maxId);
+        //DB 저장
+        KeyHolder keyHolder = new GeneratedKeyHolder();
 
         // board 날짜
         LocalDateTime dateTime = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-dd-MM");
         board.setDate(dateTime.format(formatter));
 
-        boardList.put(board.getId(), board);
+        String sql = "INSERT INTO board (title, username, password, contents, date) VALUES (?, ?, ?, ?, ?)";
+        jdbcTemplate.update( con -> {
+            PreparedStatement preparedStatement = con.prepareStatement(sql,
+                    Statement.RETURN_GENERATED_KEYS);
+
+            preparedStatement.setString(1, board.getTitle());
+            preparedStatement.setString(2, board.getUsername());
+            preparedStatement.setString(3, board.getPassword());
+            preparedStatement.setString(4, board.getContents());
+            preparedStatement.setString(5, board.getDate());
+            return preparedStatement;
+            },
+            keyHolder);
+
+        Long id = keyHolder.getKey().longValue();
+        board.setId(id);
+
+        // Entity -> ResponseDto
         BoardResponseDto boardResponseDto = new BoardResponseDto(board);
 
         return boardResponseDto;
@@ -40,35 +66,18 @@ public class BoardController {
     // 목록보기
     @GetMapping("/list")
     public List<BoardResponseDto> getLists(){
-        List<BoardResponseDto> responseList = boardList.values().stream()
-                .map(BoardResponseDto::new).toList();
-
-        return responseList;
+        return null;
     }
 
     //게시물 수정하기
     @PutMapping("/list/{id}")
     public Long updateBoard(@PathVariable Long id, @RequestBody BoardRequestDto requestDto){
-        // 해당 메모가 DB에 존재하는지 확인
-        if(boardList.containsKey(id)){
-            Board board = boardList.get(id);
-
-            //수정
-            board.update(requestDto);
-            return board.getId();
-        }else{
-            throw new IllegalStateException("선택한 메모는 존재하지 않습니다.");
-        }
+        return null;
     }
 
     @DeleteMapping("/detail/{id}")
     public Long deleteMemo(@PathVariable Long id){
-        if(boardList.containsKey(id)){
-            boardList.remove(id);
-            return id;
-        }else{
-            throw new IllegalStateException("선택한 메모는 존재하지 않습니다.");
-        }
+        return null;
     }
 
 
