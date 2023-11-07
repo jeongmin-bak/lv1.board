@@ -6,11 +6,14 @@ import com.example.springboard.entity.Board;
 import lombok.val;
 
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -66,18 +69,52 @@ public class BoardController {
     // 목록보기
     @GetMapping("/list")
     public List<BoardResponseDto> getLists(){
-        return null;
+        // DB 조회
+        String sql = "SELECT * FROM board order by date desc";
+
+        return jdbcTemplate.query(sql, new RowMapper<BoardResponseDto>() {
+            @Override
+            public BoardResponseDto mapRow(ResultSet rs, int rowNum) throws SQLException {
+                // SQL 의 결과로 받아온 Memo 데이터들을 MemoResponseDto 타입으로 변환해줄 메서드
+                Long id = rs.getLong("id");
+                String title = rs.getString("title");
+                String username = rs.getString("username");
+                String contents = rs.getString("contents");
+                String date = rs.getString("date");
+                return new BoardResponseDto(id, title, username, contents, date);
+            }
+        });
     }
 
     //게시물 수정하기
     @PutMapping("/list/{id}")
     public Long updateBoard(@PathVariable Long id, @RequestBody BoardRequestDto requestDto){
+        Board board = findById(id);
+
         return null;
     }
 
     @DeleteMapping("/detail/{id}")
     public Long deleteMemo(@PathVariable Long id){
         return null;
+    }
+
+    private Board findById(Long id) {
+        // DB 조회
+        String sql = "SELECT * FROM board WHERE id = ?";
+
+        return jdbcTemplate.query(sql, resultSet -> {
+            if(resultSet.next()) {
+                Board board = new Board();
+                board.setUsername(resultSet.getString("title"));
+                board.setUsername(resultSet.getString("username"));
+                board.setContents(resultSet.getString("contents"));
+                board.setContents(resultSet.getString("date"));
+                return board;
+            } else {
+                return null;
+            }
+        }, id);
     }
 
 

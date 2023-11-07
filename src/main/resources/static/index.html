@@ -4,7 +4,51 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Spring 게시판</title>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+
+  <script>
+    $(document).ready(function(){
+      getBoardList();
+    });
+
+    function getBoardList() {
+      // 1. 기존 메모 내용을 지웁니다.
+      $('#cards-box').empty();
+      // 2. 메모 목록을 불러와서 HTML로 붙입니다.
+      $.ajax({
+        type: 'GET',
+        url: '/board/list',
+        success: function (response) {
+          for (let i = 0; i < response.length; i++) {
+            let message = response[i];
+            let id = message['id'];
+            let title = message['title'];
+            let username = message['username'];
+            let contents = message['contents'];
+            let date = message['date'];
+            let modifiedAt = message['modifiedAt'];
+
+            addHTML(id, title, username, contents, date, modifiedAt);
+          }
+        }
+      })
+    }
+
+    function addHTML(id, title, username, contents, date, modifiedAt) {
+      // 1. HTML 태그를 만듭니다.
+      let tempHtml = `<tr class="board-list">
+                <td id="${id}" class="username">${id}</td>
+                <td id="${id}-title" class="title"><a href="/list/${id}">${title}</a></td>
+                <td id="${id}-username" class="username">${username}</td>
+                <td id="${id}-contents" class="contents">${contents}</td>
+                <td id="${id}-date" class="date">${date}</td>
+            </tr>`;
+      // 2. #cards-box 에 HTML을 붙인다.
+      $('#board-list').append(tempHtml);
+    }
+  </script>
 </head>
 <body>
 <div id="main">
@@ -12,30 +56,23 @@
   <h1>게시판 목록</h1>
   <hr><br>
   <br><br>
+
   <table class="table table-hover">
     <thead>
     <tr>
       <th>번호</th>
       <th>제목</th>
       <th>글쓴이</th>
+      <th>내용</th>
       <th>작성일</th>
     </tr>
     </thead>
-    <tbody>
-    <tr>
-      <td>1</td>
-      <td>제목 test1</td>
-      <td>ㅇㅇ</td>
-      <td>2023/07/03</td>
-    </tr>
-    <tr>
-      <td>2</td>
-      <td>제목 test3</td>
-      <td>운영자</td>
-      <td>2023/08/4</td>
-    </tr>
+
+    <tbody id="board-list">
+
     </tbody>
   </table>
+
 
   <br><br><br><br>
   <button type="button" class="btn btn-primary float-left" onclick="location.href='write.html'">게시물 등록</button>
