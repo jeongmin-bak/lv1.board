@@ -30,7 +30,7 @@ public class BoardRepository {
 
         // board 날짜
         LocalDateTime dateTime = LocalDateTime.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-dd-MM");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         board.setDate(dateTime.format(formatter));
 
         String sql = "INSERT INTO board (title, username, password, contents, date) VALUES (?, ?, ?, ?, ?)";
@@ -88,10 +88,11 @@ public class BoardRepository {
         return jdbcTemplate.query(sql, resultSet -> {
             if(resultSet.next()) {
                 Board board = new Board();
+                board.setId(resultSet.getLong("id"));
                 board.setTitle(resultSet.getString("title"));
                 board.setUsername(resultSet.getString("username"));
                 board.setContents(resultSet.getString("contents"));
-                board.setContents(resultSet.getString("date"));
+                board.setDate(resultSet.getString("date"));
                 return board;
             } else {
                 return null;

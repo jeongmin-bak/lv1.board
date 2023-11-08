@@ -48,7 +48,17 @@ public class BoardService {
             }
 
         } else {
-            throw new IllegalArgumentException("선택한 메모는 존재하지 않습니다.");
+            throw new IllegalArgumentException("게시물이 존재하지 않습니다.");
+        }
+    }
+
+    public BoardResponseDto detailBoard(Long id) {
+        BoardRepository boardRepository = new BoardRepository(jdbcTemplate);
+        Board board = boardRepository.findById(id);
+        if(board != null){
+            return new BoardResponseDto(board);
+        }else{
+            throw new IllegalArgumentException("게시물이 존재하지 않습니다.");
         }
     }
 
@@ -65,7 +75,7 @@ public class BoardService {
                 throw new IllegalArgumentException("비밀번호가 올바르지 않습니다.");
             }
         } else {
-            throw new IllegalArgumentException("선택한 메모는 존재하지 않습니다.");
+            throw new IllegalArgumentException("게시물이 존재하지 않습니다.");
         }
     }
 
