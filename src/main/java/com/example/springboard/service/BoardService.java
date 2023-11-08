@@ -1,5 +1,7 @@
 package com.example.springboard.service;
 
+import com.example.springboard.dto.BoardRequestDto;
+import com.example.springboard.dto.BoardResponseDto;
 import com.example.springboard.entity.Board;
 import com.example.springboard.repository.BoardRepository;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -11,6 +13,19 @@ public class BoardService {
 
     public BoardService(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
+    }
+
+    public BoardResponseDto createBoard(BoardRequestDto requestDto) {
+        Board board = new Board(requestDto);
+
+        // DB 저장
+        BoardRepository boardRepository = new BoardRepository(jdbcTemplate);
+        Board saveBoard = boardRepository.save(board);
+
+        // Entity -> ResponseDto
+        BoardResponseDto boardResponseDto = new BoardResponseDto(board);
+
+        return boardResponseDto;
     }
 
     public Long deleteBoard(Long id){
@@ -25,4 +40,6 @@ public class BoardService {
             throw new IllegalArgumentException("선택한 메모는 존재하지 않습니다.");
         }
     }
+
+
 }

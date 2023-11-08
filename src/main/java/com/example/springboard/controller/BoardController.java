@@ -33,38 +33,8 @@ public class BoardController {
 
     @PostMapping("/create")
     public BoardResponseDto createBoard(@RequestBody BoardRequestDto requestDto){
-        // requestdto -> entity 로
-        Board board = new Board(requestDto);
-
-        //DB 저장
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-
-        // board 날짜
-        LocalDateTime dateTime = LocalDateTime.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-dd-MM");
-        board.setDate(dateTime.format(formatter));
-
-        String sql = "INSERT INTO board (title, username, password, contents, date) VALUES (?, ?, ?, ?, ?)";
-        jdbcTemplate.update( con -> {
-            PreparedStatement preparedStatement = con.prepareStatement(sql,
-                    Statement.RETURN_GENERATED_KEYS);
-
-            preparedStatement.setString(1, board.getTitle());
-            preparedStatement.setString(2, board.getUsername());
-            preparedStatement.setString(3, board.getPassword());
-            preparedStatement.setString(4, board.getContents());
-            preparedStatement.setString(5, board.getDate());
-            return preparedStatement;
-            },
-            keyHolder);
-
-        Long id = keyHolder.getKey().longValue();
-        board.setId(id);
-
-        // Entity -> ResponseDto
-        BoardResponseDto boardResponseDto = new BoardResponseDto(board);
-
-        return boardResponseDto;
+        BoardService boardService = new BoardService(jdbcTemplate);
+        return boardService.createBoard(requestDto);
     }
 
     // 목록보기
