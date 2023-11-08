@@ -1,5 +1,6 @@
 package com.example.springboard.repository;
 
+import com.example.springboard.dto.BoardRequestDto;
 import com.example.springboard.dto.BoardResponseDto;
 import com.example.springboard.entity.Board;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -70,6 +71,11 @@ public class BoardRepository {
         });
     }
 
+    public void update(Long id, BoardRequestDto requestDto){
+        String sql = "UPDATE board SET title = ?, username = ?, contents = ? WHERE id = ?";
+        jdbcTemplate.update(sql, requestDto.getTitle(), requestDto.getUsername(), requestDto.getContents(), id);
+    }
+
     public void delete(Long id) {
         String sql = "DELETE FROM board WHERE id = ?";
         jdbcTemplate.update(sql, id);
@@ -91,6 +97,19 @@ public class BoardRepository {
                 return null;
             }
         }, id);
+    }
+
+    public boolean isValidPassword(Long id, String password){
+        // DB 조회
+        String sql = "SELECT * FROM board WHERE id = ? and password = ?";
+
+        return jdbcTemplate.query(sql, resultSet -> {
+            if(resultSet.next()) {
+                return true;
+            } else {
+                return false;
+            }
+        }, id, password);
     }
 
 

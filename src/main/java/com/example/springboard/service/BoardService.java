@@ -35,14 +35,35 @@ public class BoardService {
         return boardRepository.findAll();
     }
 
-    public Long deleteBoard(Long id){
+    public BoardResponseDto updateBoard(Long id, BoardRequestDto requestDto) {
+        BoardRepository boardRepository = new BoardRepository(jdbcTemplate);
+        Board board = boardRepository.findById(id);
+        if(board != null) {
+            // memo 내용 수정, 비밀번호 유효성 검사
+            if (boardRepository.isValidPassword(id, requestDto.getPassword())){
+                boardRepository.update(id, requestDto);
+                return new BoardResponseDto(board);
+            }else{
+                throw new IllegalArgumentException("비밀번호가 올바르지 않습니다.");
+            }
+
+        } else {
+            throw new IllegalArgumentException("선택한 메모는 존재하지 않습니다.");
+        }
+    }
+
+    public BoardResponseDto deleteBoard(Long id, String password){
         BoardRepository boardRepository = new BoardRepository(jdbcTemplate);
 
         Board board = boardRepository.findById(id);
         if(board != null) {
             // 게시물 삭제
-            boardRepository.delete(id);
-            return id;
+            if (boardRepository.isValidPassword(id, password)){
+                boardRepository.delete(id);
+                return new BoardResponseDto(board);
+            }else{
+                throw new IllegalArgumentException("비밀번호가 올바르지 않습니다.");
+            }
         } else {
             throw new IllegalArgumentException("선택한 메모는 존재하지 않습니다.");
         }

@@ -47,60 +47,19 @@ public class BoardController {
 
     //게시물 수정하기
     @PutMapping("/list/{id}")
-    public Long updateBoard(@PathVariable Long id, @RequestBody BoardRequestDto requestDto){
-        Board board = findById(id);
-        if(board != null) {
-            // memo 내용 수정
-            // 비밀번호 유효성 검사
-            if (isValidPassword(id, requestDto.getPassword())){
-                String sql = "UPDATE board SET title = ?, username = ?, contents = ? WHERE id = ?";
-                jdbcTemplate.update(sql, requestDto.getTitle(), requestDto.getUsername(), requestDto.getContents(), id);
-                return id;
-            }else{
-                throw new IllegalArgumentException("비밀번호가 올바르지 않습니다.");
-            }
-
-        } else {
-            throw new IllegalArgumentException("선택한 메모는 존재하지 않습니다.");
-        }
+    public BoardResponseDto updateBoard(@PathVariable Long id, @RequestBody BoardRequestDto requestDto){
+        BoardService boardService = new BoardService(jdbcTemplate);
+        return boardService.updateBoard(id, requestDto);
     }
 
     @DeleteMapping("/detail/{id}")
-    public Long deleteMemo(@PathVariable Long id){
+    public BoardResponseDto deleteMemo(@PathVariable Long id, @RequestBody BoardRequestDto requestDto){
         BoardService boardService = new BoardService(jdbcTemplate);
-        return boardService.deleteBoard(id);
+        return boardService.deleteBoard(id, requestDto.getPassword());
     }
 
-    private Board findById(Long id) {
-        // DB 조회
-        String sql = "SELECT * FROM board WHERE id = ?";
 
-        return jdbcTemplate.query(sql, resultSet -> {
-            if(resultSet.next()) {
-                Board board = new Board();
-                board.setTitle(resultSet.getString("title"));
-                board.setUsername(resultSet.getString("username"));
-                board.setContents(resultSet.getString("contents"));
-                board.setContents(resultSet.getString("date"));
-                return board;
-            } else {
-                return null;
-            }
-        }, id);
-    }
 
-    private boolean isValidPassword(Long id, String password){
-        // DB 조회
-        String sql = "SELECT * FROM board WHERE id = ? and password = ?";
-
-        return jdbcTemplate.query(sql, resultSet -> {
-            if(resultSet.next()) {
-                return true;
-            } else {
-                return false;
-            }
-        }, id, password);
-    }
 
 
 }
