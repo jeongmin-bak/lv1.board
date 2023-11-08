@@ -7,6 +7,8 @@ import com.example.springboard.repository.BoardRepository;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class BoardService {
     private final JdbcTemplate jdbcTemplate;
@@ -28,6 +30,11 @@ public class BoardService {
         return boardResponseDto;
     }
 
+    public List<BoardResponseDto> getLists() {
+        BoardRepository boardRepository = new BoardRepository(jdbcTemplate);
+        return boardRepository.findAll();
+    }
+
     public Long deleteBoard(Long id){
         BoardRepository boardRepository = new BoardRepository(jdbcTemplate);
 
@@ -40,6 +47,7 @@ public class BoardService {
             throw new IllegalArgumentException("선택한 메모는 존재하지 않습니다.");
         }
     }
+
 
 
 }

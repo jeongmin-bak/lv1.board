@@ -40,21 +40,9 @@ public class BoardController {
     // 목록보기
     @GetMapping("/list")
     public List<BoardResponseDto> getLists(){
-        // DB 조회
-        String sql = "SELECT * FROM board order by date desc";
+        BoardService boardService = new BoardService(jdbcTemplate);
+        return boardService.getLists();
 
-        return jdbcTemplate.query(sql, new RowMapper<BoardResponseDto>() {
-            @Override
-            public BoardResponseDto mapRow(ResultSet rs, int rowNum) throws SQLException {
-                // SQL 의 결과로 받아온 Memo 데이터들을 MemoResponseDto 타입으로 변환해줄 메서드
-                Long id = rs.getLong("id");
-                String title = rs.getString("title");
-                String username = rs.getString("username");
-                String contents = rs.getString("contents");
-                String date = rs.getString("date");
-                return new BoardResponseDto(id, title, username, contents, date);
-            }
-        });
     }
 
     //게시물 수정하기
